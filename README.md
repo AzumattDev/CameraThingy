@@ -1,19 +1,23 @@
-﻿A mod for admins, gives 3 placeable "cameras" you can jump back to. Didn't like any of the mod names I could come up with, so I settled with this.
+﻿A mod for admins, gives 3 placeable "cameras" you can jump back to. Didn't like any of the mod names I could come up
+with, so I settled with this.
 
 ---
+
 ```
 Only needs to be installed on the server and the admin's client. All clients do not need the mod. Useable by admins only.
 
 It is recommended to be in god mod when using this, sometimes you can fall pretty far and die :D
 
+This mod takes your camera and moves it to the locations you saved. It puts the camera into the game's freefly mode in case you want to tweak the location a bit.
 
-Note: The keybinds are NOT configured by default. Make sure you set them. Each camera location is saved to the config file, so
+NOTE: The keybinds are NOT configured by default. Make sure you set them. Each camera location is saved to the config file, so
 
 you can jump right back to them the next time that you decide to.
 ```
----
-### Made at the request of `CookieMilk#8702` and `SkunkMonkey#7942` in the OdinPlus discord.
 
+---
+
+### Made at the request of `CookieMilk#8702` and `SkunkMonkey#7942` in the OdinPlus discord.
 
 > ## Installation Instructions
 ***You must have BepInEx installed correctly! I can not stress this enough.***

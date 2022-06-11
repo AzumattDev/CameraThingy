@@ -123,7 +123,7 @@ namespace CameraThingy
         {
             if (!isAdmin) return;
 
-            var transform1 = GameCamera.instance.transform;
+            Transform transform1 = GameCamera.instance.transform;
             /* Camera 1 */
             if (_savelocationhotKey.Value.IsDown() && Player.m_localPlayer.TakeInput())
             {
