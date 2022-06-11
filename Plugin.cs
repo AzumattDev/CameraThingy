@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
@@ -13,15 +14,11 @@ namespace CameraThingy
     public class CameraThingyPlugin : BaseUnityPlugin
     {
         internal const string ModName = "CameraThingy";
-        internal const string ModVersion = "1.0.0";
+        internal const string ModVersion = "2.0.0";
         internal const string Author = "Azumatt";
         private const string ModGUID = Author + "." + ModName;
         private static string ConfigFileName = ModGUID + ".cfg";
         private static string ConfigFileFullPath = Paths.ConfigPath + Path.DirectorySeparatorChar + ConfigFileName;
-
-        private static Vector3 _camera1SaveLocation;
-        private static Vector3 _camera2SaveLocation;
-        private static Vector3 _camera3SaveLocation;
 
         private const float Playerheight = 0;
 
@@ -39,48 +36,83 @@ namespace CameraThingy
         {
             ConfigSync.IsLocked = true;
             /* Camera 1 */
-            savelocationhotKey = config("Camera 1", "SaveLocation Hotkey 1", KeyboardShortcut.Empty,
+            _savelocationhotKey = config("Camera 1", "SaveLocation Hotkey 1", KeyboardShortcut.Empty,
                 new ConfigDescription(
                     "The hotkey to save the camera's location.",
                     new AcceptableShortcuts()), false);
-            showcamerahotKey = config("Camera 1", "ShowCameraView Hotkey 1", KeyboardShortcut.Empty,
+            _showcamerahotKey = config("Camera 1", "ShowCameraView Hotkey 1", KeyboardShortcut.Empty,
                 new ConfigDescription("The hotkey to see through the camera you placed.", new AcceptableShortcuts()),
                 false);
-            cameraSavedLocation = config("Camera 1", "Camera 1 Location", new Vector3(0, 2, 0),
+            _cameraSavedLocation = config("Camera 1", "Camera 1 Location", new Vector3(0, 2, 0),
                 new ConfigDescription("The currently saved location of the camera."),
                 false);
 
-            cameraSavedLocation.SettingChanged += (_, _) => { Config.Save(); };
+            _cameraSavedRotation = config("Camera 1", "Camera 1 Rotation", new Quaternion(),
+                new ConfigDescription("The currently saved rotation of the camera."),
+                false);
+            _cameraSavedEuler = config("Camera 1", "Camera 1 Euler", new Vector3(0, 2, 0),
+                new ConfigDescription("The currently saved euler of the camera."),
+                false);
+
+            _cameraSavedVectorUp = config("Camera 1", "Camera 1 VectorUP", new Vector3(0, 2, 0),
+                new ConfigDescription("The currently saved yaw of the camera."),
+                false);
+
+            _cameraSavedLocation.SettingChanged += (_, _) => { Config.Save(); };
 
 
             /* Camera 2 */
-            savelocationhotKey2 = config("Camera 2", "SaveLocation Hotkey 2", KeyboardShortcut.Empty,
+            _savelocationhotKey2 = config("Camera 2", "SaveLocation Hotkey 2", KeyboardShortcut.Empty,
                 new ConfigDescription(
                     "The hotkey to save the camera's location.",
                     new AcceptableShortcuts()), false);
-            showcamerahotKey2 = config("Camera 2", "ShowCameraView Hotkey 2", KeyboardShortcut.Empty,
+            _showcamerahotKey2 = config("Camera 2", "ShowCameraView Hotkey 2", KeyboardShortcut.Empty,
                 new ConfigDescription("The hotkey to see through the camera you placed.", new AcceptableShortcuts()),
                 false);
-            cameraSavedLocation2 = config("Camera 2", "Camera 2 Location", new Vector3(0, 2, 0),
+            _cameraSavedLocation2 = config("Camera 2", "Camera 2 Location", new Vector3(0, 2, 0),
                 new ConfigDescription("The currently saved location of the camera."),
                 false);
 
-            cameraSavedLocation2.SettingChanged += (_, _) => { Config.Save(); };
+            _cameraSavedRotation2 = config("Camera 2", "Camera 2 Rotation", new Quaternion(),
+                new ConfigDescription("The currently saved rotation of the camera."),
+                false);
+
+            _cameraSavedEuler2 = config("Camera 2", "Camera 2 Euler", new Vector3(0, 2, 0),
+                new ConfigDescription("The currently saved euler of the camera."),
+                false);
+
+            _cameraSavedVectorUp2 = config("Camera 2", "Camera 2 VectorUP", new Vector3(0, 2, 0),
+                new ConfigDescription("The currently saved yaw of the camera."),
+                false);
+
+            _cameraSavedLocation2.SettingChanged += (_, _) => { Config.Save(); };
 
 
             /* Camera 3 */
-            savelocationhotKey3 = config("Camera 3", "SaveLocation Hotkey 3", KeyboardShortcut.Empty,
+            _savelocationhotKey3 = config("Camera 3", "SaveLocation Hotkey 3", KeyboardShortcut.Empty,
                 new ConfigDescription(
                     "The hotkey to save the camera's location.",
                     new AcceptableShortcuts()), false);
-            showcamerahotKey3 = config("Camera 3", "ShowCameraView Hotkey 3", KeyboardShortcut.Empty,
+            _showcamerahotKey3 = config("Camera 3", "ShowCameraView Hotkey 3", KeyboardShortcut.Empty,
                 new ConfigDescription("The hotkey to see through the camera you placed.", new AcceptableShortcuts()),
                 false);
-            cameraSavedLocation3 = config("Camera 3", "Camera 3 Location", new Vector3(0, 2, 0),
+            _cameraSavedLocation3 = config("Camera 3", "Camera 3 Location", new Vector3(0, 2, 0),
                 new ConfigDescription("The currently saved location of the camera."),
                 false);
 
-            cameraSavedLocation3.SettingChanged += (_, _) => { Config.Save(); };
+            _cameraSavedRotation3 = config("Camera 3", "Camera 3 Rotation", new Quaternion(),
+                new ConfigDescription("The currently saved rotation of the camera."),
+                false);
+
+            _cameraSavedEuler3 = config("Camera 3", "Camera 3 Euler", new Vector3(0, 2, 0),
+                new ConfigDescription("The currently saved euler of the camera."),
+                false);
+
+            _cameraSavedVectorUp3 = config("Camera 3", "Camera 3 VectorUP", new Vector3(0, 2, 0),
+                new ConfigDescription("The currently saved yaw of the camera."),
+                false);
+
+            _cameraSavedLocation3.SettingChanged += (_, _) => { Config.Save(); };
 
             Assembly assembly = Assembly.GetExecutingAssembly();
             _harmony.PatchAll(assembly);
@@ -89,69 +121,41 @@ namespace CameraThingy
 
         private void Update()
         {
-            /* TODO Optimize things, don't be a lazy piece of shit :)
-             Copy and paste looks bad.*/
-
             if (!isAdmin) return;
 
+            var transform1 = GameCamera.instance.transform;
             /* Camera 1 */
-            if (savelocationhotKey.Value.IsDown())
+            if (_savelocationhotKey.Value.IsDown() && Player.m_localPlayer.TakeInput())
             {
-                _camera1SaveLocation = Player.m_localPlayer.transform.position;
-                cameraSavedLocation.Value = _camera1SaveLocation;
-                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "Saving Camera 1 location.");
+                CamUpdate(transform1, 1, true);
             }
 
-            if (showcamerahotKey.Value.IsDown())
+            if (_showcamerahotKey.Value.IsDown() && Player.m_localPlayer.TakeInput())
             {
-                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "Jumping to Camera 1 location.");
-                GameCamera camera = GameCamera.instance;
-                camera.m_freeFly = true;
-                Vector3 position = cameraSavedLocation.Value;
-                camera.transform.position = position + Vector3.up * 8f - Vector3.forward * 5f;
-                Quaternion rot = Quaternion.LookRotation(position - camera.transform.position);
-                camera.m_freeFlyYaw = rot.y;
-                camera.m_freeFlyPitch = 50f;
+                CamUpdate(transform1, 1, false);
             }
 
             /* Camera 2 */
-            if (savelocationhotKey2.Value.IsDown())
+            if (_savelocationhotKey2.Value.IsDown() && Player.m_localPlayer.TakeInput())
             {
-                _camera2SaveLocation = Player.m_localPlayer.transform.position;
-                cameraSavedLocation2.Value = _camera2SaveLocation;
-                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "Saving Camera 2 location.");
+                CamUpdate(transform1, 2, true);
             }
 
-            if (showcamerahotKey2.Value.IsDown())
+            if (_showcamerahotKey2.Value.IsDown() && Player.m_localPlayer.TakeInput())
             {
-                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "Jumping to Camera 2 location.");
-                GameCamera camera = GameCamera.instance;
-                camera.m_freeFly = true;
-                Vector3 position = cameraSavedLocation2.Value;
-                camera.transform.position = position + Vector3.up * 8f - Vector3.forward * 5f;
-                Quaternion rot = Quaternion.LookRotation(position - camera.transform.position);
-                camera.m_freeFlyYaw = rot.y;
-                camera.m_freeFlyPitch = 50f;
+                CamUpdate(transform1, 2, false);
             }
+
 
             /* Camera 3 */
-            if (savelocationhotKey3.Value.IsDown())
+            if (_savelocationhotKey3.Value.IsDown() && Player.m_localPlayer.TakeInput())
             {
-                _camera3SaveLocation = Player.m_localPlayer.transform.position;
-                cameraSavedLocation3.Value = _camera3SaveLocation;
-                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "Saving Camera 3 location.");
+                CamUpdate(transform1, 3, true);
             }
 
-            if (showcamerahotKey3.Value.IsDown())
+            if (_showcamerahotKey3.Value.IsDown() && Player.m_localPlayer.TakeInput())
             {
-                Player.m_localPlayer.Message(MessageHud.MessageType.Center, "Jumping to Camera 3 location.");
-                GameCamera camera = GameCamera.instance;
-                camera.m_freeFly = true;
-                Vector3 position = cameraSavedLocation3.Value;
-                camera.transform.position = position + Vector3.up * 8f - Vector3.forward * 5f;
-                Quaternion rot = Quaternion.LookRotation(position - camera.transform.position);
-                camera.m_freeFlyYaw = rot.y;
-                camera.m_freeFlyPitch = 50f;
+                CamUpdate(transform1, 3, false);
             }
         }
 
@@ -168,6 +172,62 @@ namespace CameraThingy
             }
         }
 
+        private void CamUpdate(Transform camTransform, int cam, bool save)
+        {
+            string message = save ? "Saving" : "Jumping to";
+            string endOfMessage = save ? "information." : "location.";
+            Player.m_localPlayer.Message(MessageHud.MessageType.Center,
+                $"{message} Camera {cam.ToString()} {endOfMessage}");
+            switch (cam)
+            {
+                case 1 when save:
+                    _cameraSavedLocation.Value = camTransform.position;
+                    _cameraSavedRotation.Value = camTransform.rotation;
+                    _cameraSavedEuler.Value = camTransform.eulerAngles;
+                    _cameraSavedVectorUp.Value = camTransform.up;
+                    break;
+                case 1:
+                    GameCamera.instance.m_freeFly = true;
+                    camTransform.position = _cameraSavedLocation.Value;
+                    camTransform.rotation = _cameraSavedRotation.Value;
+                    camTransform.eulerAngles = _cameraSavedEuler.Value;
+                    GameCamera.instance.m_freeFlyYaw = _cameraSavedEuler.Value.y;
+                    GameCamera.instance.m_freeFlyPitch = _cameraSavedEuler.Value.x;
+                    camTransform.up = _cameraSavedVectorUp.Value;
+                    break;
+                case 2 when save:
+                    _cameraSavedLocation2.Value = camTransform.position;
+                    _cameraSavedRotation2.Value = camTransform.rotation;
+                    _cameraSavedEuler2.Value = camTransform.eulerAngles;
+                    _cameraSavedVectorUp2.Value = camTransform.up;
+                    break;
+                case 2:
+                    GameCamera.instance.m_freeFly = true;
+                    camTransform.position = _cameraSavedLocation2.Value;
+                    camTransform.rotation = _cameraSavedRotation2.Value;
+                    camTransform.eulerAngles = _cameraSavedEuler2.Value;
+                    GameCamera.instance.m_freeFlyYaw = _cameraSavedEuler2.Value.y;
+                    GameCamera.instance.m_freeFlyPitch = _cameraSavedEuler2.Value.x;
+                    camTransform.up = _cameraSavedVectorUp2.Value;
+                    break;
+                case 3 when save:
+                    _cameraSavedLocation3.Value = camTransform.position;
+                    _cameraSavedRotation3.Value = camTransform.rotation;
+                    _cameraSavedEuler3.Value = camTransform.eulerAngles;
+                    _cameraSavedVectorUp3.Value = camTransform.up;
+                    break;
+                case 3:
+                    GameCamera.instance.m_freeFly = true;
+                    camTransform.position = _cameraSavedLocation3.Value;
+                    camTransform.rotation = _cameraSavedRotation3.Value;
+                    camTransform.eulerAngles = _cameraSavedEuler3.Value;
+                    GameCamera.instance.m_freeFlyYaw = _cameraSavedEuler3.Value.y;
+                    GameCamera.instance.m_freeFlyPitch = _cameraSavedEuler3.Value.x;
+                    camTransform.up = _cameraSavedVectorUp3.Value;
+                    break;
+            }
+        }
+
         [HarmonyPatch(typeof(Player), nameof(Player.LateUpdate))]
         public static class TurnOffReversePoint
         {
@@ -178,8 +238,11 @@ namespace CameraThingy
                 {
                     ZNet.instance.SetReferencePosition(GameCamera.instance.transform.position);
                     result = false;
-                    Player.m_localPlayer.transform.position = new Vector3(Player.m_localPlayer.transform.position.x,
-                        Playerheight, Player.m_localPlayer.transform.position.z);
+                    Transform transform1 = Player.m_localPlayer.transform;
+                    Vector3 position = transform1.position;
+                    position = new Vector3(position.x,
+                        Playerheight, position.z);
+                    transform1.position = position;
                 }
 
                 return result;
@@ -255,21 +318,30 @@ namespace CameraThingy
         #region ConfigOptions
 
         /* Camera 1 */
-        private static ConfigEntry<KeyboardShortcut> savelocationhotKey = null!;
-        private static ConfigEntry<KeyboardShortcut> showcamerahotKey = null!;
+        private static ConfigEntry<KeyboardShortcut> _savelocationhotKey = null!;
+        private static ConfigEntry<KeyboardShortcut> _showcamerahotKey = null!;
 
-        private static ConfigEntry<Vector3> cameraSavedLocation = null!;
+        private static ConfigEntry<Vector3> _cameraSavedLocation = null!;
+        private static ConfigEntry<Quaternion> _cameraSavedRotation = null!;
+        private static ConfigEntry<Vector3> _cameraSavedEuler = null!;
+        private static ConfigEntry<Vector3> _cameraSavedVectorUp = null!;
 
         /* Camera 2 */
-        private static ConfigEntry<KeyboardShortcut> savelocationhotKey2 = null!;
-        private static ConfigEntry<KeyboardShortcut> showcamerahotKey2 = null!;
+        private static ConfigEntry<KeyboardShortcut> _savelocationhotKey2 = null!;
+        private static ConfigEntry<KeyboardShortcut> _showcamerahotKey2 = null!;
 
-        private static ConfigEntry<Vector3> cameraSavedLocation2 = null!;
+        private static ConfigEntry<Vector3> _cameraSavedLocation2 = null!;
+        private static ConfigEntry<Quaternion> _cameraSavedRotation2 = null!;
+        private static ConfigEntry<Vector3> _cameraSavedEuler2 = null!;
+        private static ConfigEntry<Vector3> _cameraSavedVectorUp2 = null!;
 
         /* Camera 3 */
-        private static ConfigEntry<KeyboardShortcut> savelocationhotKey3 = null!;
-        private static ConfigEntry<KeyboardShortcut> showcamerahotKey3 = null!;
-        private static ConfigEntry<Vector3> cameraSavedLocation3 = null!;
+        private static ConfigEntry<KeyboardShortcut> _savelocationhotKey3 = null!;
+        private static ConfigEntry<KeyboardShortcut> _showcamerahotKey3 = null!;
+        private static ConfigEntry<Vector3> _cameraSavedLocation3 = null!;
+        private static ConfigEntry<Quaternion> _cameraSavedRotation3 = null!;
+        private static ConfigEntry<Vector3> _cameraSavedEuler3 = null!;
+        private static ConfigEntry<Vector3> _cameraSavedVectorUp3 = null!;
 
         private ConfigEntry<T> config<T>(string group, string name, T value, ConfigDescription description,
             bool synchronizedSetting = true)

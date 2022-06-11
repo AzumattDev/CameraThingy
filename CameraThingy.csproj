@@ -9,7 +9,7 @@
         <AppDesignerFolder>Properties</AppDesignerFolder>
         <RootNamespace>CameraThingy</RootNamespace>
         <AssemblyName>CameraThingy</AssemblyName>
-        <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+        <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
         <LangVersion>10</LangVersion>
         <Nullable>enable</Nullable>
@@ -129,5 +129,11 @@
     <Target Name="AfterBuild">
     </Target>
     -->
+<!--    <Target Name="Copy" AfterTargets="ILRepack">
+        <Exec Command="copy /Y &quot;$(TargetDir)$(AssemblyName).dll&quot; &quot;$(GamePath)\BepInEx\plugins\$(AssemblyName).dll&quot;" />
+    </Target>-->
+    <Target Name="Copy" AfterTargets="ILRepack">
+        <Exec Command="copy /Y &quot;$(TargetDir)$(AssemblyName).dll&quot; &quot;C:\Users\crypt\AppData\Roaming\r2modmanPlus-local\Valheim\profiles\PermaTesting\BepInEx\plugins\$(AssemblyName).dll&quot;" />
+    </Target>
 
 </Project>
