@@ -1,0 +1,9 @@
+{
+    "name": "CameraThingy",
+    "version_number": "2.0.1",
+    "website_url": "https://discord.gg/Pb6bVMnFb2",
+    "description": "A mod for admins, gives 3 placeable \"cameras\" you can jump back to.",
+    "dependencies": [
+        "denikson-BepInExPack_Valheim-5.4.1900"
+    ]
+}
