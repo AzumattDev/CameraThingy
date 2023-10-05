@@ -57,14 +57,3 @@ you can jump right back to them the next time that you decide to.
 For Questions or Comments, find me in the Odin Plus Team Discord:
 [![https://i.imgur.com/XXP6HCU.png](https://i.imgur.com/XXP6HCU.png)](https://discord.gg/Pb6bVMnFb2)
 
-***
-> # Update Information (Latest listed first)
-> ### v2.0.1
-> - Update ServerSync internally
-> ### v2.0.0
-> - Save the rotation and yaw of the camera
-> - Changes to how the camera saves in general
-> - Update README
-> ### v1.0.0
-> - Initial Release
-
