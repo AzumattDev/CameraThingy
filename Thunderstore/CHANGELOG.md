@@ -1,3 +1,5 @@
+> ### v2.0.3
+> - Courtesy Update for Valheim 0.217.46. Just bumping the version and updating the last updated date. Nothing to see here.
 > ### v2.0.2
 > - Update for Valheim 0.217.22
 > ### v2.0.1
