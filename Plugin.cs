@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using BepInEx;
@@ -14,7 +15,7 @@ namespace CameraThingy
     public class CameraThingyPlugin : BaseUnityPlugin
     {
         internal const string ModName = "CameraThingy";
-        internal const string ModVersion = "2.0.3";
+        internal const string ModVersion = "2.0.4";
         internal const string Author = "Azumatt";
         private const string ModGUID = Author + "." + ModName;
         private static string ConfigFileName = ModGUID + ".cfg";
@@ -26,91 +27,50 @@ namespace CameraThingy
 
         private readonly Harmony _harmony = new(ModGUID);
 
-        public static readonly ManualLogSource CameraThingyLogger =
-            BepInEx.Logging.Logger.CreateLogSource(ModName);
+        public static readonly ManualLogSource CameraThingyLogger = BepInEx.Logging.Logger.CreateLogSource(ModName);
 
-        private static readonly ConfigSync ConfigSync = new(ModGUID)
-            { DisplayName = ModName, CurrentVersion = ModVersion, MinimumRequiredVersion = ModVersion };
+        private static readonly ConfigSync ConfigSync = new(ModGUID) { DisplayName = ModName, CurrentVersion = ModVersion, MinimumRequiredVersion = ModVersion };
 
         public void Awake()
         {
             ConfigSync.IsLocked = true;
             /* Camera 1 */
-            _savelocationhotKey = config("Camera 1", "SaveLocation Hotkey 1", KeyboardShortcut.Empty,
-                new ConfigDescription(
-                    "The hotkey to save the camera's location.",
-                    new AcceptableShortcuts()), false);
-            _showcamerahotKey = config("Camera 1", "ShowCameraView Hotkey 1", KeyboardShortcut.Empty,
-                new ConfigDescription("The hotkey to see through the camera you placed.", new AcceptableShortcuts()),
-                false);
-            _cameraSavedLocation = config("Camera 1", "Camera 1 Location", new Vector3(0, 2, 0),
-                new ConfigDescription("The currently saved location of the camera."),
-                false);
+            _savelocationhotKey = config("Camera 1", "SaveLocation Hotkey 1", KeyboardShortcut.Empty, new ConfigDescription("The hotkey to save the camera's location.", new AcceptableShortcuts()), false);
+            _showcamerahotKey = config("Camera 1", "ShowCameraView Hotkey 1", KeyboardShortcut.Empty, new ConfigDescription("The hotkey to see through the camera you placed.", new AcceptableShortcuts()), false);
+            _cameraSavedLocation = config("Camera 1", "Camera 1 Location", new Vector3(0, 2, 0), new ConfigDescription("The currently saved location of the camera."), false);
 
-            _cameraSavedRotation = config("Camera 1", "Camera 1 Rotation", new Quaternion(),
-                new ConfigDescription("The currently saved rotation of the camera."),
-                false);
-            _cameraSavedEuler = config("Camera 1", "Camera 1 Euler", new Vector3(0, 2, 0),
-                new ConfigDescription("The currently saved euler of the camera."),
-                false);
+            _cameraSavedRotation = config("Camera 1", "Camera 1 Rotation", new Quaternion(), new ConfigDescription("The currently saved rotation of the camera."), false);
+            _cameraSavedEuler = config("Camera 1", "Camera 1 Euler", new Vector3(0, 2, 0), new ConfigDescription("The currently saved euler of the camera."), false);
 
-            _cameraSavedVectorUp = config("Camera 1", "Camera 1 VectorUP", new Vector3(0, 2, 0),
-                new ConfigDescription("The currently saved yaw of the camera."),
-                false);
+            _cameraSavedVectorUp = config("Camera 1", "Camera 1 VectorUP", new Vector3(0, 2, 0), new ConfigDescription("The currently saved yaw of the camera."), false);
 
             _cameraSavedLocation.SettingChanged += (_, _) => { Config.Save(); };
 
 
             /* Camera 2 */
-            _savelocationhotKey2 = config("Camera 2", "SaveLocation Hotkey 2", KeyboardShortcut.Empty,
-                new ConfigDescription(
-                    "The hotkey to save the camera's location.",
-                    new AcceptableShortcuts()), false);
-            _showcamerahotKey2 = config("Camera 2", "ShowCameraView Hotkey 2", KeyboardShortcut.Empty,
-                new ConfigDescription("The hotkey to see through the camera you placed.", new AcceptableShortcuts()),
-                false);
-            _cameraSavedLocation2 = config("Camera 2", "Camera 2 Location", new Vector3(0, 2, 0),
-                new ConfigDescription("The currently saved location of the camera."),
-                false);
+            _savelocationhotKey2 = config("Camera 2", "SaveLocation Hotkey 2", KeyboardShortcut.Empty, new ConfigDescription("The hotkey to save the camera's location.", new AcceptableShortcuts()), false);
+            _showcamerahotKey2 = config("Camera 2", "ShowCameraView Hotkey 2", KeyboardShortcut.Empty, new ConfigDescription("The hotkey to see through the camera you placed.", new AcceptableShortcuts()), false);
+            _cameraSavedLocation2 = config("Camera 2", "Camera 2 Location", new Vector3(0, 2, 0), new ConfigDescription("The currently saved location of the camera."), false);
 
-            _cameraSavedRotation2 = config("Camera 2", "Camera 2 Rotation", new Quaternion(),
-                new ConfigDescription("The currently saved rotation of the camera."),
-                false);
+            _cameraSavedRotation2 = config("Camera 2", "Camera 2 Rotation", new Quaternion(), new ConfigDescription("The currently saved rotation of the camera."), false);
 
-            _cameraSavedEuler2 = config("Camera 2", "Camera 2 Euler", new Vector3(0, 2, 0),
-                new ConfigDescription("The currently saved euler of the camera."),
-                false);
+            _cameraSavedEuler2 = config("Camera 2", "Camera 2 Euler", new Vector3(0, 2, 0), new ConfigDescription("The currently saved euler of the camera."), false);
 
-            _cameraSavedVectorUp2 = config("Camera 2", "Camera 2 VectorUP", new Vector3(0, 2, 0),
-                new ConfigDescription("The currently saved yaw of the camera."),
-                false);
+            _cameraSavedVectorUp2 = config("Camera 2", "Camera 2 VectorUP", new Vector3(0, 2, 0), new ConfigDescription("The currently saved yaw of the camera."), false);
 
             _cameraSavedLocation2.SettingChanged += (_, _) => { Config.Save(); };
 
 
             /* Camera 3 */
-            _savelocationhotKey3 = config("Camera 3", "SaveLocation Hotkey 3", KeyboardShortcut.Empty,
-                new ConfigDescription(
-                    "The hotkey to save the camera's location.",
-                    new AcceptableShortcuts()), false);
-            _showcamerahotKey3 = config("Camera 3", "ShowCameraView Hotkey 3", KeyboardShortcut.Empty,
-                new ConfigDescription("The hotkey to see through the camera you placed.", new AcceptableShortcuts()),
-                false);
-            _cameraSavedLocation3 = config("Camera 3", "Camera 3 Location", new Vector3(0, 2, 0),
-                new ConfigDescription("The currently saved location of the camera."),
-                false);
+            _savelocationhotKey3 = config("Camera 3", "SaveLocation Hotkey 3", KeyboardShortcut.Empty, new ConfigDescription("The hotkey to save the camera's location.", new AcceptableShortcuts()), false);
+            _showcamerahotKey3 = config("Camera 3", "ShowCameraView Hotkey 3", KeyboardShortcut.Empty, new ConfigDescription("The hotkey to see through the camera you placed.", new AcceptableShortcuts()), false);
+            _cameraSavedLocation3 = config("Camera 3", "Camera 3 Location", new Vector3(0, 2, 0), new ConfigDescription("The currently saved location of the camera."), false);
 
-            _cameraSavedRotation3 = config("Camera 3", "Camera 3 Rotation", new Quaternion(),
-                new ConfigDescription("The currently saved rotation of the camera."),
-                false);
+            _cameraSavedRotation3 = config("Camera 3", "Camera 3 Rotation", new Quaternion(), new ConfigDescription("The currently saved rotation of the camera."), false);
 
-            _cameraSavedEuler3 = config("Camera 3", "Camera 3 Euler", new Vector3(0, 2, 0),
-                new ConfigDescription("The currently saved euler of the camera."),
-                false);
+            _cameraSavedEuler3 = config("Camera 3", "Camera 3 Euler", new Vector3(0, 2, 0), new ConfigDescription("The currently saved euler of the camera."), false);
 
-            _cameraSavedVectorUp3 = config("Camera 3", "Camera 3 VectorUP", new Vector3(0, 2, 0),
-                new ConfigDescription("The currently saved yaw of the camera."),
-                false);
+            _cameraSavedVectorUp3 = config("Camera 3", "Camera 3 VectorUP", new Vector3(0, 2, 0), new ConfigDescription("The currently saved yaw of the camera."), false);
 
             _cameraSavedLocation3.SettingChanged += (_, _) => { Config.Save(); };
 
@@ -176,8 +136,7 @@ namespace CameraThingy
         {
             string message = save ? "Saving" : "Jumping to";
             string endOfMessage = save ? "information." : "location.";
-            Player.m_localPlayer.Message(MessageHud.MessageType.Center,
-                $"{message} Camera {cam.ToString()} {endOfMessage}");
+            Player.m_localPlayer.Message(MessageHud.MessageType.Center, $"{message} Camera {cam.ToString()} {endOfMessage}");
             switch (cam)
             {
                 case 1 when save:
@@ -240,8 +199,7 @@ namespace CameraThingy
                     result = false;
                     Transform transform1 = Player.m_localPlayer.transform;
                     Vector3 position = transform1.position;
-                    position = new Vector3(position.x,
-                        Playerheight, position.z);
+                    position = new Vector3(position.x, Playerheight, position.z);
                     transform1.position = position;
                 }
 
@@ -258,14 +216,11 @@ namespace CameraThingy
                 bool result = true;
                 if (Player.m_localPlayer != null && GameCamera.instance != null && GameCamera.instance.m_freeFly)
                 {
-                    Vector2i zone = ZoneSystem.instance.GetZone(ZNet.instance.GetReferencePosition());
+                    Vector2i zone = ZoneSystem.GetZone(ZNet.instance.GetReferencePosition());
                     __instance.m_tempCurrentObjects.Clear();
                     __instance.m_tempCurrentDistantObjects.Clear();
-                    ZDOMan.instance.FindSectorObjects(zone, ZoneSystem.instance.m_activeArea,
-                        ZoneSystem.instance.m_activeDistantArea, __instance.m_tempCurrentObjects,
-                        __instance.m_tempCurrentDistantObjects);
-                    if (!__instance.m_tempCurrentObjects.Contains(
-                            ZDOMan.instance.GetZDO(Player.m_localPlayer.GetZDOID())))
+                    ZDOMan.instance.FindSectorObjects(zone, ZoneSystem.instance.m_activeArea, ZoneSystem.instance.m_activeDistantArea, __instance.m_tempCurrentObjects, __instance.m_tempCurrentDistantObjects);
+                    if (!__instance.m_tempCurrentObjects.Contains(ZDOMan.instance.GetZDO(Player.m_localPlayer.GetZDOID())))
                     {
                         __instance.m_tempCurrentObjects.Add(ZDOMan.instance.GetZDO(Player.m_localPlayer.GetZDOID()));
                     }
@@ -343,14 +298,9 @@ namespace CameraThingy
         private static ConfigEntry<Vector3> _cameraSavedEuler3 = null!;
         private static ConfigEntry<Vector3> _cameraSavedVectorUp3 = null!;
 
-        private ConfigEntry<T> config<T>(string group, string name, T value, ConfigDescription description,
-            bool synchronizedSetting = true)
+        private ConfigEntry<T> config<T>(string group, string name, T value, ConfigDescription description, bool synchronizedSetting = true)
         {
-            ConfigDescription extendedDescription =
-                new(
-                    description.Description +
-                    (synchronizedSetting ? " [Synced with Server]" : " [Not Synced with Server]"),
-                    description.AcceptableValues, description.Tags);
+            ConfigDescription extendedDescription = new(description.Description + (synchronizedSetting ? " [Synced with Server]" : " [Not Synced with Server]"), description.AcceptableValues, description.Tags);
             ConfigEntry<T> configEntry = Config.Bind(group, name, value, extendedDescription);
             //var configEntry = Config.Bind(group, name, value, description);
 
@@ -360,8 +310,7 @@ namespace CameraThingy
             return configEntry;
         }
 
-        private ConfigEntry<T> config<T>(string group, string name, T value, string description,
-            bool synchronizedSetting = true)
+        private ConfigEntry<T> config<T>(string group, string name, T value, string description, bool synchronizedSetting = true)
         {
             return config(group, name, value, new ConfigDescription(description), synchronizedSetting);
         }

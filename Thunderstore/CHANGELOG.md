@@ -1,3 +1,5 @@
+> ### v2.0.4
+> - Update for Seelenquell for the Bog Witch patch.
 > ### v2.0.3
 > - Courtesy Update for Valheim 0.217.46. Just bumping the version and updating the last updated date. Nothing to see here.
 > ### v2.0.2
